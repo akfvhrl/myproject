@@ -1,19 +1,27 @@
-
 from pymongo import MongoClient
 
-client = MongoClient('localhost',27017)
+client = MongoClient("localhost", 27017)
 db = client.dbsparta
 
-user = input()
+email = input()
 password = input()
 
-a = db.users.find({"name":user})
+a = db.users.find_one({"email": email})
 
-if a is not None:
-    if a["password"] == password:
+if a is None:
+    user = input("이름을 입력해주세요")
+    new_user = {
+        "email": email,
+        "name": user,
+        "password": password,
+        "money": 100000000,
+        "get_stocks": {},
+        "to_buy": {},
+        "to_sale": {},
+    }
+    db.users.insert_one(new_user)
+else:
+    if a["password"] is password:
         print("로그인")
     else:
-        print("잘못된 비밀번호")
-else:
-    new_user = {"name":user, "password":password, "money":100000000, "get_stocks":{}, "to_buy": {}, "to_sale": {}}
-    db.users.insert_one(new_user)
+        print("비밀번호가 틀렸습니다.")
