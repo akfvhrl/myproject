@@ -1,12 +1,18 @@
 import schedule
-
 from selenium import webdriver
 from bs4 import BeautifulSoup
-
+from pymongo import MongoClient
 import time
 
 
 def get_my_stock():
+    client = MongoClient("localhost", 27017)
+    db = client.dbsparta
+    x = db.stocks
+    codes = []
+    for a in x.find({}, {"_id": 0, "code": 1}):
+        codes.append(a["code"])
+
     ### option 적용 ###
     options = webdriver.ChromeOptions()
     options.add_argument("headless")
@@ -18,9 +24,7 @@ def get_my_stock():
 
     driver = webdriver.Chrome("chromedriver", options=options)
     ##################
-
-    codes = ["005930", "035420", "017670", "096770", "035720"]
-
+    update = []
     for code in codes:
         # 네이버 주식페이지 url을 입력합니다.
         url = "https://m.stock.naver.com/item/main.nhn#/stocks/" + code + "/total"
@@ -34,23 +38,26 @@ def get_my_stock():
         # 크롬에서 HTML 정보를 가져오고 BeautifulSoup을 통해 검색하기 쉽도록 가공합니다.
         soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        name = soup.select_one(
-            "#header > div.end_header_topinfo > div.flick-container.major_info_wrp > div > div:nth-child(2) > div > div.item_wrp > div > h2"
-        ).text
-
         current_price = soup.select_one(
             "#header > div.end_header_topinfo > div.flick-container.major_info_wrp > div > div:nth-child(2) > div > div.stock_wrp > div.price_wrp > strong"
+        ).text
+
+        variance = soup.select_one(
+            "#header > div.end_header_topinfo > div.flick-container.major_info_wrp > div > div:nth-child(2) > div > div.stock_wrp > div.price_wrp > div > span.gap_price > span.price"
         ).text
 
         rate = soup.select_one(
             "#header > div.end_header_topinfo > div.flick-container.major_info_wrp > div > div:nth-child(2) > div > div.stock_wrp > div.price_wrp > div > span.gap_rate > span.rate"
         ).text
-
-        print(name, current_price, rate)
-
+        update.append([code, current_price, variance, rate])
     print("-------")
     # 크롬을 종료합니다.
     driver.quit()
+    # db에 값들을 업데이트해줍니다.
+    for i in range(20):
+        x.update_one({"code": update[i][0]}, {"$set": {"share": update[i][1]}})
+        x.update_one({"code": update[i][0]}, {"$set": {"variance": update[i][2]}})
+        x.update_one({"code": update[i][0]}, {"$set": {"variance_rate": update[i][3]}})
 
 
 def job():
@@ -58,7 +65,7 @@ def job():
 
 
 def run():
-    schedule.every(15).seconds.do(job)  # 15초에 한번씩 실행
+    schedule.every(60).seconds.do(job)  # 60초에 한번씩 실행
     while True:
         schedule.run_pending()
 
