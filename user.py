@@ -37,7 +37,7 @@ while is_login is 1:
         to_buy = input()
         element = lists.find_one({"title": to_buy}, {"_id": 0})
         print(element)
-        // user db update
+        # user db update
     if todo == "logout":
         is_login = 0
         print("logout")
