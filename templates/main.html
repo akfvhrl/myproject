@@ -6,17 +6,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>main</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+        .item {
+            height: 37px;
+            padding-top: 8px;
+            margin: 0 80px;
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        .elips {
+            display: inline-block;
+            max-width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        
+        .code {
+            font-size: 10px;
+            line-height: 13px;
+            color: #888;
+            display: block;
+        }
+        
+        .stock {
+            display: table;
+            width: 82%;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .price {
+            text-align: left;
+            display: inline-block;
+            vertical-align: top;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 
 <body>
-    <div>
-        <div>
+    <div class="item">
+        <div class="elips">
             <h2>삼성전자</h2>
         </div>
-        <span>005930 KOSPI</span>
+        <span class="code">005930 KOSPI</span>
     </div>
-    <div>
-        <div>
+    <hr>
+    <div class="stock">
+        <div class="price">
             <strong>50,100</strong>
             <div>
                 <span>
