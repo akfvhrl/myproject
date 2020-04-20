@@ -8,5 +8,15 @@ def home():
     return render_template("index.html")
 
 
+@app.route("/main")
+def main():
+    return render_template("main.html")
+
+
+@app.route("/mypage")
+def mypage():
+    return render_template("mypage.html")
+
+
 if __name__ == "__main__":
-    app.run("0.0.0.0", port=5001, debug=True)
+    app.run("0.0.0.0", port=5000, debug=True)
