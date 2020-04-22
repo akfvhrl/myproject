@@ -5,8 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>main</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <style>
+        div.left {
+            width: 50%;
+            float: left;
+            box-sizing: border-box;
+            border-right: 3px;
+            border-right-color: black;
+        }
+        
+        div.right {
+            width: 50%;
+            float: right;
+            box-sizing: border-box;
+        }
+        
         .item {
             height: 37px;
             padding-top: 8px;
@@ -42,35 +55,185 @@
             vertical-align: top;
             margin-top: 5px;
         }
+        
+        .img {
+            max-width: 100%;
+            display: inline-block;
+        }
+        
+        .day {
+            display: inline-block;
+        }
+        
+        .week {
+            display: none;
+        }
+        
+        .month {
+            display: none;
+        }
     </style>
+    <script>
+        // $(document).ready(function() {
+        //     left_listing();
+        // });
+
+        function left_listing() {
+            var code = $('#input-code').val();
+            if (code == '') {
+                code == '005930';
+            }
+            $.ajax({
+                type: "GET",
+                url: "/main/stock",
+                data: {
+                    'code': code
+                },
+                success: function(response) {
+                    if (response['result'] == 'success') {
+                        make_left(response['data'])
+                    }
+                }
+            })
+        }
+
+        function make_left(stock) {
+            $('#left').html('');
+            const template = `<div class="item">
+            <div class="elips">
+                <h2>${stock.title}</h2>
+            </div>
+            <span class="code">${stock.code} KOSPI</span>
+        </div>
+        <hr>
+        <div class="stock">
+            <div class="price left">
+                <strong>${stock.share}</strong>
+                <div>
+                    <span>
+                        <span>${stock.variance}</span>
+                    </span>
+                    <span>
+                        <span>${stock.variance_rate}</span>
+                    </span>
+                </div>
+            </div>
+            <div class="right">
+                <img src="https://ssl.pstatic.net/imgfinance/chart/mobile/mini/${stock.code}_end_up.png?1587386850190">
+            </div>
+        </div>
+        <hr>
+        <div>
+            <button>일봉</button>
+            <button>주봉</button>
+            <button>월봉</button>
+            <div>
+                <img class="img day" id="day" src="https://ssl.pstatic.net/imgfinance/chart/mobile/candle/day/${stock.code}_end.png">
+                <img class="img week" id="week" src="https://ssl.pstatic.net/imgfinance/chart/mobile/candle/week/${stock.code}_end.png">
+                <img class="img month" id="month" src="https://ssl.pstatic.net/imgfinance/chart/mobile/candle/month/${stock.code}_end.png">
+            </div>
+        </div>
+        <hr>
+        <span>여기는 추가할 내용들</span>`;
+            $('#left').append(template);
+        }
+
+        function chart_day() {
+            var day = document.getElementById("day");
+            day.style.display = "inline-block"
+            var week = document.getElementById("week");
+            week.style.display = "none"
+            var month = document.getElementById("month");
+            month.style.display = "none"
+        }
+
+        function chart_week() {
+            window.console.log('1');
+            var day = document.getElementById("day");
+            day.style.display = "none"
+            var week = document.getElementById("week");
+            week.style.display = "inline-block"
+            var month = document.getElementById("month");
+            month.style.display = "none"
+        }
+
+        function chart_month() {
+            var day = document.getElementById("day");
+            day.style.display = "none"
+            var week = document.getElementById("week");
+            week.style.display = "none"
+            var month = document.getElementById("month");
+            month.style.display = "inline-block"
+        }
+
+        function chart_hide() {
+            var day = document.getElementById("day");
+            day.style.display = "none"
+            var week = document.getElementById("week");
+            week.style.display = "none"
+            var month = document.getElementById("month");
+            month.style.display = "none"
+        }
+    </script>
 </head>
 
 <body>
-    <div class="item">
-        <div class="elips">
-            <h2>삼성전자</h2>
+    <div class='left' id='left'>
+        <div class="item">
+            <div class="elips">
+                <h2>삼성전자</h2>
+            </div>
+            <span class="code">005930 KOSPI</span>
         </div>
-        <span class="code">005930 KOSPI</span>
-    </div>
-    <hr>
-    <div class="stock">
-        <div class="price">
-            <strong>50,100</strong>
-            <div>
-                <span>
-                    <em>▼</em>
-                    <span>1,300</span>
-                </span>
-                <span>
-                    <span>-2.53</span>
-                <span>%</span>
-                </span>
+        <hr>
+        <div class="stock">
+            <div class="price left">
+                <strong>50,100</strong>
+                <div>
+                    <span>
+                        <span>▼ 1,300</span>
+                    </span>
+                    <span>
+                        <span>-2.53 %</span>
+                    </span>
+                </div>
+            </div>
+            <div class="right">
+                <img src="https://ssl.pstatic.net/imgfinance/chart/mobile/mini/005930_end_up.png?1587386850190">
             </div>
         </div>
-        <img src="https://ssl.pstatic.net/imgfinance/chart/mobile/mini/005930_end_up.png?1587386850190">
+        <hr>
+        <div>
+            <button onclick="chart_day()">일봉</button>
+            <button onclick="chart_week()">주봉</button>
+            <button onclick="chart_month()">월봉</button>
+            <button onclick="chart_hide()">숨기기</button>
+            <div>
+                <img class="img day" id="day" src="https://ssl.pstatic.net/imgfinance/chart/mobile/candle/day/005930_end.png">
+                <img class="img week" id="week" src="https://ssl.pstatic.net/imgfinance/chart/mobile/candle/week/005930_end.png">
+                <img class="img month" id="month" src="https://ssl.pstatic.net/imgfinance/chart/mobile/candle/month/005930_end.png">
+            </div>
+        </div>
+        <hr>
+        <span>여기는 추가할 내용들</span>
     </div>
+    <div class="right">
+        <input id="input-code" ,type="text">
+        <button onclick="left_listing">검색</button>
+        <span>잔고 : </span>
+        <hr>
+        <div>보유 종목
+            <div>
 
-
+            </div>
+        </div>
+        <hr> 매수 수량 : <input type="number">
+        <button>매수</button>
+        <div>
+            매도 수량 : <input type="number">
+            <button>매도</button>
+        </div>
+    </div>
 </body>
 
 </html>
