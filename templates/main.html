@@ -4,26 +4,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>main</title>
+    <title>주식연습!!</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
     <style>
         div.left {
-            width: 50%;
+            width: 49.9%;
             float: left;
             box-sizing: border-box;
-            border-right: 3px;
-            border-right-color: black;
+        }
+        
+        div.left_all {
+            border-right: 1px solid #555555;
         }
         
         div.right {
-            width: 50%;
+            width: 49.9%;
             float: right;
             box-sizing: border-box;
+            border-left: 1px;
         }
         
         .item {
-            height: 37px;
-            padding-top: 8px;
-            margin: 0 80px;
+            display: table;
+            margin: 0 auto;
             text-align: center;
             white-space: nowrap;
         }
@@ -72,26 +81,148 @@
         .month {
             display: none;
         }
+        
+        .graph {
+            display: table;
+            margin: 0 auto;
+        }
     </style>
     <script>
-        // $(document).ready(function() {
-        //     left_listing();
-        // });
+        $(document).ready(function() {
+            init_left();
+            right_listing();
+            $('#mystocks').html('');
+            right_stocks_listing();
+        });
+
+        function right_listing() {
+            $.ajax({
+                type: "POST",
+                url: "/main/right",
+                data: {},
+                success: function(response) {
+                    if (response['result'] == 'success') {
+                        make_right(response['data']);
+                    }
+                }
+            })
+        }
+
+        function make_right(money) {
+            $('#right').html('');
+            const template = `<input id="input-code" ,type="text">
+        <button onclick="left_listing()">검색</button>
+        <span>잔고 : ${money}</span>
+        <hr>
+        <div id="flick">
+            <div>보유 종목
+                <div>
+                    <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">종목명</th>
+                        <th scope="col">종목 코드</th>
+                        <th scope="col">구매가</th>
+                        <th scope="col">수량</th>
+                    </tr>
+                </thead>
+                <tbody id="my_list">
+
+                </tbody>
+            </table>
+                </div>
+            </div>
+            <hr> 거래 수량 : <input id = "count" type="number">
+            <button onclick="buy_stocks()">매수</button>
+            <button onclick="sale_stocks()">매도</button>
+        </div>`;
+            $('#right').append(template);
+        }
+
+        function right_stocks_listing() {
+            $.ajax({
+                type: "POST",
+                url: "/main/my_stock",
+                data: {},
+                success: function(response) {
+                    if (response['result'] == 'success') {
+                        stocks = response['data'];
+                        size = response['size'];
+                        key = Object.keys(stocks);
+                        for (var i = 0; i < size; i++) {
+                            stock = stocks[key[i]];
+                            make_my_stocks(key[i], stocks, i + 1);
+                        }
+                    }
+                }
+            })
+        }
+
+        function make_my_stocks(key, stock, i) {
+            const template = `<tr>
+                    <th scope="row">${i}</th>
+                    <td>${key}</td>
+                    <td>${stock[key][0]}</td>
+                    <td>${stock[key][1]}</td>
+                    <td>${stock[key][2]}</td>
+                </tr>`;
+            $('#my_list').append(template);
+        }
+
+        function buy_stocks() {
+            var code = $('#input-code').val();
+            var count = $('#count').val();
+            $.ajax({
+                type: "POST",
+                url: "/main/buy",
+                data: {
+                    'code': code,
+                    'count': count
+                },
+                success: function(response) {
+                    if (response['result'] == 'success') {
+                        alert(response['msg']);
+                        $("#flick").load(window.location.href + "#flick");
+                    } else if (response['result'] == 'fail') {
+                        alert(response['msg']);
+                    }
+                }
+            })
+        }
+
+        function sale_stocks() {
+            var code = $('#input-code').val();
+            var count = $('#count').val();
+            $.ajax({
+                type: "POST",
+                url: "/main/sale",
+                data: {
+                    'code': code,
+                    'count': count
+                },
+                success: function(response) {
+                    if (response['result'] == 'success') {
+                        alert(response['msg']);
+                        $("#flick").load(window.location.href + "#flick");
+                    } else if (response['result'] == 'fail') {
+                        alert(response['msg']);
+                    }
+                }
+            })
+        }
 
         function left_listing() {
-            var code = $('#input-code').val();
-            if (code == '') {
-                code == '005930';
-            }
+            const code = $('#input-code').val();
             $.ajax({
-                type: "GET",
+                type: "POST",
                 url: "/main/stock",
                 data: {
                     'code': code
                 },
                 success: function(response) {
                     if (response['result'] == 'success') {
-                        make_left(response['data'])
+                        make_left(response['data']);
                     }
                 }
             })
@@ -103,7 +234,7 @@
             <div class="elips">
                 <h2>${stock.title}</h2>
             </div>
-            <span class="code">${stock.code} KOSPI</span>
+            <span class="code" id="code">${stock.code} KOSPI</span>
         </div>
         <hr>
         <div class="stock">
@@ -118,24 +249,71 @@
                     </span>
                 </div>
             </div>
-            <div class="right">
+            <div class="right img">
                 <img src="https://ssl.pstatic.net/imgfinance/chart/mobile/mini/${stock.code}_end_up.png?1587386850190">
             </div>
         </div>
         <hr>
-        <div>
-            <button>일봉</button>
-            <button>주봉</button>
-            <button>월봉</button>
+        <div class="graph">
+            <button onclick="chart_day()">일봉</button>
+            <button onclick="chart_week()">주봉</button>
+            <button onclick="chart_month()">월봉</button>
+            <button onclick="chart_hide()">숨기기</button>
             <div>
                 <img class="img day" id="day" src="https://ssl.pstatic.net/imgfinance/chart/mobile/candle/day/${stock.code}_end.png">
                 <img class="img week" id="week" src="https://ssl.pstatic.net/imgfinance/chart/mobile/candle/week/${stock.code}_end.png">
                 <img class="img month" id="month" src="https://ssl.pstatic.net/imgfinance/chart/mobile/candle/month/${stock.code}_end.png">
             </div>
         </div>
-        <hr>
-        <span>여기는 추가할 내용들</span>`;
+        <button onclick='init_left()'>목록보기</button>
+        <hr>`;
             $('#left').append(template);
+        }
+
+        function init_left() {
+            $('#left').html(`<table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">종목명</th>
+                    <th scope="col">종목 코드</th>
+                    <th scope="col">시가</th>
+                    <th scope="col">전일비</th>
+                    <th scope="col">전일비</th>
+                </tr>
+            </thead>
+            <tbody id="stock_list">
+
+            </tbody>
+        </table>
+        <hr>
+        <span>여기는 추가할 내용들</span>`);
+            $.ajax({
+                type: "POST",
+                url: "/main/left",
+                data: {},
+                success: function(response) {
+                    if (response['result'] == 'success') {
+                        stocks = response['data']
+                        for (var i = 0; i < 20; i++) {
+                            stock = stocks[i];
+                            make_list(stock, i + 1);
+                        }
+                    }
+                }
+            })
+        }
+
+        function make_list(stock, i) {
+            const template = `<tr>
+                    <th scope="row">${i}</th>
+                    <td>${stock.title}</td>
+                    <td>${stock.code}</td>
+                    <td>${stock.share}</td>
+                    <td>${stock.variance}</td>
+                    <td>${stock.variance_rate}</td>
+                </tr>`;
+            $('#stock_list').append(template);
         }
 
         function chart_day() {
@@ -148,7 +326,6 @@
         }
 
         function chart_week() {
-            window.console.log('1');
             var day = document.getElementById("day");
             day.style.display = "none"
             var week = document.getElementById("week");
@@ -178,61 +355,30 @@
 </head>
 
 <body>
-    <div class='left' id='left'>
-        <div class="item">
-            <div class="elips">
-                <h2>삼성전자</h2>
-            </div>
-            <span class="code">005930 KOSPI</span>
-        </div>
-        <hr>
-        <div class="stock">
-            <div class="price left">
-                <strong>50,100</strong>
-                <div>
-                    <span>
-                        <span>▼ 1,300</span>
-                    </span>
-                    <span>
-                        <span>-2.53 %</span>
-                    </span>
-                </div>
-            </div>
-            <div class="right">
-                <img src="https://ssl.pstatic.net/imgfinance/chart/mobile/mini/005930_end_up.png?1587386850190">
-            </div>
-        </div>
-        <hr>
-        <div>
-            <button onclick="chart_day()">일봉</button>
-            <button onclick="chart_week()">주봉</button>
-            <button onclick="chart_month()">월봉</button>
-            <button onclick="chart_hide()">숨기기</button>
-            <div>
-                <img class="img day" id="day" src="https://ssl.pstatic.net/imgfinance/chart/mobile/candle/day/005930_end.png">
-                <img class="img week" id="week" src="https://ssl.pstatic.net/imgfinance/chart/mobile/candle/week/005930_end.png">
-                <img class="img month" id="month" src="https://ssl.pstatic.net/imgfinance/chart/mobile/candle/month/005930_end.png">
-            </div>
-        </div>
+    <div class='left left_all' id='left'>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">종목명</th>
+                    <th scope="col">종목 코드</th>
+                    <th scope="col">시가</th>
+                    <th scope="col">전일비</th>
+                    <th scope="col">전일비</th>
+                </tr>
+            </thead>
+            <tbody id="stock_list">
+
+            </tbody>
+        </table>
         <hr>
         <span>여기는 추가할 내용들</span>
     </div>
-    <div class="right">
-        <input id="input-code" ,type="text">
-        <button onclick="left_listing">검색</button>
-        <span>잔고 : </span>
-        <hr>
-        <div>보유 종목
-            <div>
 
-            </div>
-        </div>
-        <hr> 매수 수량 : <input type="number">
-        <button>매수</button>
-        <div>
-            매도 수량 : <input type="number">
-            <button>매도</button>
-        </div>
+
+
+    <div class="right" id="right">
+
     </div>
 </body>
 

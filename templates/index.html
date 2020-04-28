@@ -4,13 +4,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LogIN</title>
+    <title>로그인-주식연습</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <style>
+        .center {
+            margin: auto;
+            width: 40%;
+            border: 3px solid #555555;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            color: #555555;
+        }
+        
+        .signin {
+            display: block;
+        }
+        
+        .signup {
+            display: none;
+        }
+    </style>
+    <script>
+        function sign_up() {
+            var signin = document.getElementById("signin");
+            signin.style.display = "none";
+            var signup = document.getElementById("signup");
+            signup.style.display = "block";
+        }
+
+        function sign_in() {
+            let email = $('#email').val();
+            let password = $('#password').val();
+            if (email == '') {
+                alert("이메일을 입력해주세요.");
+                $('#email').focus;
+                return;
+            }
+            if (password == '') {
+                alert("비밀번호를 입력해주세요.");
+                $('#password').focus;
+                return;
+            }
+            $.ajax({
+                type: "POST",
+                url: "/login",
+                data: {
+                    'email': email,
+                    'password': password
+                },
+                success: function(response) {
+                    if (response['result'] == 'success') {
+                        alert(response['msg']);
+                        window.location.href = '/main';
+                    } else {
+                        alert(response['msg']);
+                    }
+                }
+            });
+        }
+
+        function make_account() {
+            const email = $('#make_email').val();
+            const password = $('#make_password').val();
+            const name = $('#make_name').val();
+            $.ajax({
+                type: 'POST',
+                url: "/signup",
+                data: {
+                    'email': email,
+                    'password': password,
+                    'name': name
+                },
+                success: function(response) {
+                    if (response['result'] == 'success') {
+                        alert(response['msg']);
+                        window.location.reload();
+                    } else {
+                        alert(response['msg']);
+                    }
+                }
+            })
+        }
+    </script>
 </head>
 
 <body>
-    <h1>Log In Page</h1>
-    email: <input type="text" /> password: <input type="text" />
-    <button>Log In</button>
+    <div class="center signin" id="signin">
+        <h1>Log In Page</h1>
+        email: <input id="email" type="text" /><br> password: <input id="password" type="password" /><br>
+        <button onclick="sign_in()">Sign In</button>
+        <button onclick="sign_up()">Sign Up</button>
+    </div>
+    <div class="center signup" id="signup">
+        <h1>Sign Up</h1>
+        email: <input id="make_email" type="text" /><br> password: <input id="make_password" type="text" /><br> name:
+        <input id="make_name" type="text" /><br>
+        <button onclick="make_account()" onclick="location.href='/main'">Sign Up</button>
+    </div>
 </body>
 
 </html>
